@@ -1,0 +1,240 @@
+<title>Relevé des pièces</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Plan à gauche, liste des pièces à droite ; bandeau de synthèse au-dessus. Couleurs Airplan. */
+:root{
+  --bg:#F4F7F8; --panel:#FFFFFF; --ink:#22303C; --muted:#5E6B78; --line:#D6E4E8;
+  --accent:#4F8FA1; --accent-soft:#E3F0F3; --ok:#2E7D5B; --ok-soft:#E2F2EA; --warn:#B4650F; --warn-soft:#FBEEDC;
+  --plan-bg:#FFFFFF;
+  --f-body:'Public Sans', 'Helvetica Neue', Arial, sans-serif; --f-num:'JetBrains Mono', ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141B21; --panel:#1C252D; --ink:#E5ECF0; --muted:#9AA9B5; --line:#2D3A44;
+  --accent:#7FB8C8; --accent-soft:#22343C; --ok:#6CC59A; --ok-soft:#1D332A; --warn:#E8A35A; --warn-soft:#3A2B1A; --plan-bg:#EEF2F4; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141B21; --panel:#1C252D; --ink:#E5ECF0; --muted:#9AA9B5; --line:#2D3A44;
+  --accent:#7FB8C8; --accent-soft:#22343C; --ok:#6CC59A; --ok-soft:#1D332A; --warn:#E8A35A; --warn-soft:#3A2B1A; --plan-bg:#EEF2F4; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;
+  padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+h1{font-size:26px;font-weight:800;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0;max-width:70ch}
+.progress{display:flex;flex-direction:column;gap:6px;min-width:220px}
+.progress .bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.progress .bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.progress small{color:var(--muted);font-variant-numeric:tabular-nums}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.summary{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;overflow-x:auto}
+.summary table{border-collapse:collapse;width:100%;min-width:620px}
+.summary th,.summary td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.summary th:first-child,.summary td:first-child{text-align:left}
+.summary thead th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.summary .ref{color:var(--muted)}
+.summary .gap-warn{color:var(--warn);font-weight:600}
+.summary tfoot td{border-bottom:none;padding-top:12px}
+.summary input{width:90px;text-align:right;font:inherit;font-family:var(--f-num);padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.note{font-size:13px;color:var(--muted);margin:10px 0 0}
+.main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:900px){.main{grid-template-columns:1fr}}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.tab{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer;display:flex;gap:6px;align-items:center}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.tab .cnt{font-family:var(--f-num);font-size:12px;opacity:.85}
+.tab:focus-visible,.btn:focus-visible,select:focus-visible,input:focus-visible,.marker:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.plan{position:relative;background:var(--plan-bg);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.plan img{display:block;width:100%;height:auto}
+.marker{position:absolute;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:50%;border:2px solid #fff;
+  background:var(--accent);color:#fff;font:700 13px/26px var(--f-body);text-align:center;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.35);padding:0}
+.marker.done{background:var(--ok)}
+.marker.alert{background:var(--warn)}
+.marker.sel{transform:translate(-50%,-50%) scale(1.25);box-shadow:0 0 0 4px rgba(79,143,161,.35)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted);margin-top:8px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px;background:var(--c)}
+.rooms{display:flex;flex-direction:column;gap:10px}
+.room{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.room.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.room-head{display:flex;gap:10px;align-items:center}
+.room-head .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:13px;display:grid;place-items:center}
+.room.done .room-head .n{background:var(--ok)}
+.room.alert:not(.done) .room-head .n{background:var(--warn)}
+.room-head b{flex:1;min-width:0}
+.pill{font-size:12px;font-weight:600;border-radius:999px;padding:2px 9px;white-space:nowrap}
+.pill.prop{background:var(--accent-soft);color:var(--accent)}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.when{background:var(--line);color:var(--muted)}
+.fields{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:end}
+.fields label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+.fields select,.fields input{font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+.fields input{width:96px;font-family:var(--f-num);text-align:right}
+.meta{font-size:13px;color:var(--muted)}
+.meta .src{font-family:var(--f-num);font-size:12px}
+.flag{font-size:13px;background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:6px 10px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:inherit;font-size:14px;font-weight:600;border-radius:8px;padding:6px 14px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:#fff}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn[disabled]{opacity:.5;cursor:default}
+.empty,.status{background:var(--panel);border:1px dashed var(--line);border-radius:12px;padding:16px;color:var(--muted)}
+.howto{background:var(--accent-soft);border-radius:12px;padding:14px 16px;font-size:14px}
+.howto code{font-family:var(--f-num);font-size:13px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Relevé des pièces · formulaire statistique</h1>
+      <p class="sub"><span id="dossierNom"></span> L'agent a proposé chaque pièce à partir des noms, hauteurs et cotes lus sur les plans. Vérifiez, corrigez, validez : seules les valeurs validées comptent.</p>
+    </div>
+    <div class="progress" aria-live="polite">
+      <div class="bar"><i id="bar"></i></div>
+      <small id="progressTxt">Chargement des pièces…</small>
+    </div>
+  </header>
+
+  <section class="summary" aria-labelledby="sumTitle">
+    <table>
+      <caption id="sumTitle" style="text-align:left;font-weight:700;padding-bottom:8px">Cadre B · surfaces (m²) calculées à partir des pièces</caption>
+      <thead><tr><th>Ligne du formulaire</th><th>Avant · validé</th><th>Avant · proposé</th><th>Après · validé</th><th>Après · proposé</th><th class="ref">Déclaré avant</th><th class="ref">Déclaré après</th></tr></thead>
+      <tbody id="sumBody"></tbody>
+      <tfoot>
+        <tr><td>5. Surface totale brute (murs compris, tous niveaux)</td>
+          <td colspan="2"><input id="brutAvant" type="number" step="0.1" min="0" inputmode="decimal" aria-label="Surface brute avant"></td>
+          <td colspan="2"><input id="brutApres" type="number" step="0.1" min="0" inputmode="decimal" aria-label="Surface brute après"></td>
+          <td class="ref num" id="refBrutAv"></td><td class="ref num" id="refBrutAp"></td></tr>
+      </tfoot>
+    </table>
+    <p class="note" id="demoNote"></p>
+    <p class="note">« Proposé » additionne toutes les pièces, validées ou non. « Déclaré » reprend le formulaire déposé, pour comparaison. La surface totale est une surface brute : elle ne se déduit pas des trois lignes, c'est à l'architecte de la donner.</p>
+  </section>
+
+  <div class="main">
+    <section aria-label="Plans">
+      <div class="tabs" role="tablist" id="tabs"></div>
+      <div class="plan" id="plan"><img id="planImg" alt=""></div>
+      <div class="legend"><span style="--c:var(--accent)">Proposé</span><span style="--c:var(--warn)">À confirmer</span><span style="--c:var(--ok)">Validé</span></div>
+    </section>
+    <section aria-label="Pièces du plan" class="rooms" id="rooms">
+      <div class="empty">Les pièces apparaissent ici dès que la base est chargée. Si rien ne vient, demandez à Claude de recharger le relevé.</div>
+    </section>
+  </div>
+
+  <div class="howto" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+    <span>Quand tout est validé : copiez le résultat et collez-le dans la conversation avec Claude.</span>
+    <button class="btn" id="copyBtn" type="button">Copier le résultat</button>
+  </div>
+  <textarea id="resultBox" readonly hidden style="width:100%;min-height:140px;font-family:var(--f-num);font-size:12px"></textarea>
+</div>
+
+<script>
+/* Claude remplace l'objet DONNEES ci-dessous (voir SKILL.md). */
+const DONNEES = /*DONNEES*/{"dossier":"Exemple","plans":[],"pieces":[],"declare":null}/*FIN*/;
+const PLANS=DONNEES.plans;
+const CATS={habitation:'Habitation','caves':'Caves, greniers et annexes','autre':'Autre usage'};
+const ROWS=[['habitation','4. Habitation'],['caves','4. Caves, greniers et annexes'],['autre','4. Autre usage (garages compris)']];
+let rooms=DONNEES.pieces.map(r=>({...r})), dossier={declare:DONNEES.declare||{}}, current=null, selected=null, db=true;
+const KEY='releve-'+(DONNEES.dossier||'');
+try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved){for(const r of rooms){const v=saved.pieces?.[r.id];if(v)Object.assign(r,v)}dossier.brut_avant=saved.brut_avant??null;dossier.brut_apres=saved.brut_apres??null}}catch(e){}
+function persist(){try{const o={pieces:{},brut_avant:dossier.brut_avant,brut_apres:dossier.brut_apres};for(const r of rooms)if(r.statut==='validé')o.pieces[r.id]={statut:r.statut,cat:r.cat,surf:r.surf,valide_le:r.valide_le};localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
+try{ current=localStorage.getItem('releve-plan') }catch(e){}
+if(!PLANS.some(p=>p.id===current)) current=PLANS[0]?.id;
+const fmt=n=>(Math.round(n*100)/100).toLocaleString('fr-BE',{minimumFractionDigits:1,maximumFractionDigits:2});
+const el=(t,a={},...c)=>{const e=document.createElement(t);for(const[k,v]of Object.entries(a)){if(k==='class')e.className=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else if(v!==false&&v!=null)e.setAttribute(k,v===true?'':v)}for(const x of c.flat()){if(x==null)continue;e.append(x.nodeType?x:document.createTextNode(String(x)))}return e};
+const isDone=r=>r.statut==='validé';
+const cat=r=>isDone(r)?r.cat:r.cat_ia;
+const surf=r=>Number(isDone(r)?r.surf:r.surf_ia)||0;
+
+function renderTabs(){
+  const t=document.getElementById('tabs'); t.replaceChildren();
+  for(const p of PLANS){
+    const rs=rooms.filter(r=>r.plan===p.id), d=rs.filter(isDone).length;
+    t.append(el('button',{class:'tab',role:'tab','aria-selected':p.id===current?'true':'false',onclick:()=>{current=p.id;selected=null;try{localStorage.setItem('releve-plan',current)}catch(e){};render()}},p.label,el('span',{class:'cnt'},rs.length?`${d}/${rs.length}`:'')));
+  }
+}
+function renderPlan(){
+  const plan=document.getElementById('plan'), img=document.getElementById('planImg');
+  const p=PLANS.find(x=>x.id===current);
+  if(p&&p.image){img.src=p.image;img.hidden=false}else{img.removeAttribute('src');img.hidden=true}img.alt=p?'Plan '+p.label:'';
+  plan.querySelectorAll('.marker').forEach(m=>m.remove());
+  for(const r of rooms.filter(r=>r.plan===current&&typeof r.x==='number'&&typeof r.y==='number')){
+    const cls='marker'+(isDone(r)?' done':(r.alerte?' alert':''))+(selected===r.id?' sel':'');
+    plan.append(el('button',{class:cls,style:`left:${r.x*100}%;top:${r.y*100}%`,'aria-label':`Pièce ${r.n} : ${r.nom}`,onclick:()=>{selected=r.id;render();document.getElementById('room-'+r.id)?.scrollIntoView({block:'nearest',behavior:'smooth'})}},r.n));
+  }
+}
+function renderRooms(){
+  const box=document.getElementById('rooms');
+  const rs=rooms.filter(r=>r.plan===current).sort((a,b)=>a.n-b.n);
+  if(!rooms.length){box.replaceChildren(el('div',{class:'empty'},db?'Aucune pièce dans la base pour l\'instant. Demandez à Claude de charger le relevé.':'La base de données n\'est pas disponible dans cette vue : ouvrez la page dans claude.ai pour valider les pièces.'));return}
+  box.replaceChildren(...rs.map(r=>{
+    const sel=el('select',{id:'cat-'+r.id,'aria-label':'Catégorie'},...Object.entries(CATS).map(([k,v])=>el('option',{value:k,selected:k===cat(r)},v)));
+    const inp=el('input',{id:'surf-'+r.id,type:'number',step:'0.01',min:'0',inputmode:'decimal','aria-label':'Surface en m²',value:surf(r)});
+    const situ=r.demoli?'Démolie (cadre C)':[r.avant&&'avant',r.apres&&'après'].filter(Boolean).join(' et ');
+    const done=isDone(r);
+    const card=el('article',{class:'room'+(done?' done':'')+(r.alerte?' alert':'')+(selected===r.id?' sel':''),id:'room-'+r.id,onclick:()=>{if(selected!==r.id){selected=r.id;renderPlan();document.querySelectorAll('.room.sel').forEach(x=>x.classList.remove('sel'));card.classList.add('sel')}}},
+      el('div',{class:'room-head'},el('span',{class:'n'},r.n),el('b',{},r.nom),el('span',{class:'pill when'},situ),el('span',{class:'pill '+(done?'ok':'prop')},done?'Validé':'Proposé')),
+      el('div',{class:'fields'},el('label',{},'Catégorie',sel),el('label',{},'Surface (m²)',inp),el('div',{class:'meta'},'Hauteur : ',el('span',{class:'num'},r.hsp||'non indiquée'))),
+      el('div',{class:'meta'},'Lecture de l\'agent : ',el('span',{class:'src'},r.source||''),` · proposé ${CATS[r.cat_ia]}, ${fmt(r.surf_ia)} m²`),
+      r.note?el('div',{class:r.alerte?'flag':'meta'},r.note):null,
+      el('div',{class:'actions'},
+        el('button',{class:'btn',onclick:e=>{e.stopPropagation();save(r,sel.value,inp.value)}},done?'Revalider':'Valider'),
+        done?el('button',{class:'btn ghost',onclick:e=>{e.stopPropagation();reopen(r)}},'Rouvrir'):null),
+      r.valide_le&&done?el('div',{class:'meta'},'Validé le '+new Date(r.valide_le).toLocaleString('fr-BE')):null);
+    return card}));
+}
+function renderSummary(){
+  const sum=(pred,useValid)=>{const o={habitation:0,caves:0,autre:0};for(const r of rooms){if(r.demoli||!pred(r))continue;if(useValid&&!isDone(r))continue;o[cat(r)]+=surf(r)}return o};
+  const av=sum(r=>r.avant,true), avp=sum(r=>r.avant,false), ap=sum(r=>r.apres,true), app=sum(r=>r.apres,false);
+  const ref=dossier.declare||{};
+  const b=document.getElementById('sumBody'); b.replaceChildren();
+  for(const[k,lab]of ROWS){
+    const ra=ref.avant?.[k], rp=ref.apres?.[k];
+    const cell=(v,refv)=>{const td=el('td',{class:'num'},fmt(v));if(refv!=null&&Math.abs(v-refv)>2)td.classList.add('gap-warn');return td};
+    b.append(el('tr',{},el('td',{},lab),el('td',{class:'num'},fmt(av[k])),cell(avp[k],ra),el('td',{class:'num'},fmt(ap[k])),cell(app[k],rp),el('td',{class:'num ref'},ra??'—'),el('td',{class:'num ref'},rp??'—')));
+  }
+  const ba=document.getElementById('brutAvant'), bp=document.getElementById('brutApres');
+  if(document.activeElement!==ba) ba.value=dossier.brut_avant??'';
+  if(document.activeElement!==bp) bp.value=dossier.brut_apres??'';
+  document.getElementById('refBrutAv').textContent=ref.brut_avant??'—';
+  document.getElementById('refBrutAp').textContent=ref.brut_apres??'—';
+  const dem=rooms.filter(r=>r.demoli);
+  document.getElementById('demoNote').textContent=dem.length?`Pièces démolies, à déclarer au cadre C et non au cadre B : ${dem.map(r=>`${r.nom} (${fmt(surf(r))} m², ${CATS[cat(r)].toLowerCase()})`).join(' ; ')}.`:'';
+  const d=rooms.filter(isDone).length, n=rooms.length;
+  document.getElementById('bar').style.width=n?(d/n*100)+'%':'0';
+  document.getElementById('progressTxt').textContent=n?`${d} pièce${d>1?'s':''} validée${d>1?'s':''} sur ${n}`:'Aucune pièce chargée';
+}
+function render(){renderTabs();renderPlan();renderRooms();renderSummary()}
+
+function save(r,c,s){
+  const v=Number(String(s).replace(',','.'));
+  if(!(v>=0)) return;
+  Object.assign(r,{cat:c,surf:Math.round(v*100)/100,statut:'validé',valide_le:new Date().toISOString()});persist();render();
+}
+function reopen(r){ r.statut='proposé'; persist(); render(); }
+function showErr(e){document.getElementById('progressTxt').textContent='Enregistrement impossible ('+(e&&e.code||'erreur')+'). Réessayez dans un instant.'}
+function saveBrut(){
+  const num=v=>v===''?null:Math.round(Number(String(v).replace(',','.'))*100)/100;
+  dossier.brut_avant=num(document.getElementById('brutAvant').value);dossier.brut_apres=num(document.getElementById('brutApres').value);persist();renderSummary();
+}
+function resultat(){
+  const t={};for(const s of ['avant','apres']){t[s]={};for(const k of Object.keys(CATS))t[s][k]=Math.round(rooms.filter(r=>!r.demoli&&r[s]&&isDone(r)&&r.cat===k).reduce((a,r)=>a+Number(r.surf),0)*100)/100}
+  return {dossier:DONNEES.dossier,pieces_validees:rooms.filter(isDone).length,pieces_total:rooms.length,
+    non_validees:rooms.filter(r=>!isDone(r)).map(r=>r.nom),cadre_B:t,
+    demolies:rooms.filter(r=>r.demoli&&isDone(r)).map(r=>({nom:r.nom,categorie:r.cat,surface:r.surf})),
+    surface_brute:{avant:dossier.brut_avant??null,apres:dossier.brut_apres??null},
+    detail:rooms.filter(isDone).map(r=>({id:r.id,nom:r.nom,avant:!!r.avant,apres:!!r.apres,demoli:!!r.demoli,categorie:r.cat,surface:r.surf}))};
+}
+document.getElementById('copyBtn').addEventListener('click',async()=>{
+  const txt='RÉSULTAT DU RELEVÉ\n'+JSON.stringify(resultat(),null,1);
+  const box=document.getElementById('resultBox');box.value=txt;
+  try{await navigator.clipboard.writeText(txt);document.getElementById('copyBtn').textContent='Copié'}
+  catch(e){box.hidden=false;box.focus();box.select();document.getElementById('copyBtn').textContent='Sélectionné : faites Cmd+C ou Ctrl+C'}
+});
+document.getElementById('brutAvant').addEventListener('change',saveBrut);
+document.getElementById('brutApres').addEventListener('change',saveBrut);
+
+document.getElementById('dossierNom').textContent=DONNEES.dossier?DONNEES.dossier+'.':'';
+render();
+</script>
