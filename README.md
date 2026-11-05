@@ -28,6 +28,12 @@ Claude déclenche une skill d'après sa description. Vous pouvez aussi l'appeler
 - Ne collez pas les plans ou les données d'un client dans une session d'IA sans son accord (secret professionnel, RGPD).
 - Le connecteur Airplan est décrit sur [airplan.be/ia/mcp/ce-que-le-mcp-permet](https://airplan.be/ia/mcp/ce-que-le-mcp-permet).
 
+## Licence
+
+© 2026 Airplan. Ces skills sont publiées sous licence [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/deed.fr) : vous pouvez les utiliser, les modifier et les partager, y compris pour un usage commercial, à condition de citer Airplan ([airplan.be](https://airplan.be)) et d'indiquer si vous les avez modifiées. Texte complet dans [LICENSE](LICENSE).
+
+Les parties reprises de Flat to 3D (en particulier [`dessin-en-relief/references/prompt-type.md`](dessin-en-relief/references/prompt-type.md)) restent aussi sous la licence MIT de leur auteur, dont la notice est jointe dans [`dessin-en-relief/LICENSE-flat-to-3d`](dessin-en-relief/LICENSE-flat-to-3d).
+
 ## Crédits
 
 Les skills « dessin en relief » reprennent la méthode « Flat to 3D » de Samnang Aing ([github.com/Sam1983Aing/flat-to-3d](https://github.com/Sam1983Aing/flat-to-3d), licence MIT), adaptée à des architectes et à des bâtiments réels. Données publiques citées : © SPW, CC-BY 4.0 (CADMAP, PICC, LiDAR 2021-2022).
