@@ -16,7 +16,7 @@ Pour chaque plan :
 - Repérer chaque pièce, **y compris celles qui n'ont pas de nom** : salle de bain, WC, dégagement, escalier, local technique.
 - Surface : le produit des cotes quand elles encadrent la pièce. Sinon, une estimation, marquée « estimée » avec sa méthode. Ne jamais présenter une estimation comme une mesure.
 
-Si un plan est illisible, ou si des niveaux manquent (par exemple, pas de plan projeté pour les combles), le dire avant d'aller plus loin.
+Si un plan est illisible, ou si des niveaux manquent (par exemple, pas de plan projeté pour les combles), le dire avant d'aller plus loin. Plan scanné : regarder d'abord si les chiffres des cotes sont nets à la résolution du fichier. S'ils ne le sont pas, ne lire aucune cote et demander le PDF ou le DWG d'origine.
 
 ## Étape 2 · Proposer chaque pièce
 
@@ -70,18 +70,17 @@ Présenter le tableau final : lignes avant, après et différence.
 
 ## Étape 5 · Écrire dans Airplan (si le connecteur Airplan est branché)
 
-1. Retrouver le projet (`search-projects`) et lire le formulaire (`get-project-form`, `appendix-stat-model1`).
-2. Si le cadre B n'apparaît pas, demander à l'architecte de cocher « B. Transformation » dans Airplan. Le connecteur ne peut pas le faire.
+1. Retrouver le projet (`search-projects`) et lire le formulaire (`get-project-form`, `appendix-stat-model1`). S'il est sélectionné dans le projet mais pas encore créé, `init-project-form` d'abord.
+2. Si le cadre B n'apparaît pas, le type de travaux n'est pas « Transformation ». Ce champ se règle dans Airplan (`editable: false`, `editable_via_ui: true`) : donner à l'architecte le lien `edit_url` du formulaire, puis relire le formulaire.
 3. Montrer les valeurs qui vont être écrites et **attendre son accord**.
 4. `update-project-form` : les lignes du cadre B, la surface totale brute fournie par l'architecte, et le volume s'il est connu.
 5. Relire le formulaire, puis confirmer ce qui a été écrit ou signaler tout écart.
 
-Sans connecteur, donner le tableau à recopier.
+Sans connecteur, ou s'il reste en lecture seule (réglage de départ ; l'accès complet se choisit dans le profil Airplan, rubrique « Accès MCP »), donner le tableau à recopier.
 
 ## Règles
 
-- Lire la description de chaque champ renvoyée par `get-project-form` (sous-titre et infobulle) : elle donne la définition officielle, par exemple celle de la surface totale.
-
+- Quand `get-project-form` renvoie la description d'un champ (sous-titre et infobulle), la lire : elle donne la définition officielle, par exemple celle de la surface totale.
 - Aucune somme faite de tête : les totaux viennent du code.
 - Aucune valeur écrite dans un formulaire sans validation explicite de l'architecte.
 - Ne jamais inventer une cote ni une hauteur. Une estimation est toujours signalée comme telle.

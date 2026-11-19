@@ -28,7 +28,7 @@ Deuxième exemple, un projet : « Une extension à Namur, en relief » (https://
 | Maquette Pascal | Murs, baies, toitures, niveaux en JSON | Export de la scène, ou le fichier de description envoyé à Pascal ; c'est ce qu'on a fait pour la Cour des Mineurs |
 | Archicad, Revit, SketchUp | Le volume complet | Un export 3D lisible par three.js (glTF/GLB de préférence, sinon OBJ ; IFC avec la bibliothèque web-ifc). Les formats proposés dépendent du logiciel et de sa version : vérifier avant la séance |
 | Plans 2D seulement | Emprises, niveaux, baies | Saisir les cotes dans un fichier de données (JSON ou tableau), puis générer les volumes en code |
-| Données publiques (Wallonie) | Parcelle, emprise, hauteurs de corniche, relief, toiture | Cadastre (CADMAP), PICC, LiDAR MNT/MNS 2021-2022 du SPW ; via le MCP Airplan quand il sera disponible |
+| Données publiques (Wallonie) | Parcelle, emprise, hauteurs de corniche, relief, toiture | Cadastre (CADMAP), PICC, LiDAR MNT/MNS 2021-2022 du SPW. Le connecteur Airplan donne le contour de la parcelle (`get-project-geojson`, Lambert 72 en mètres) ; l'emprise et les hauteurs viennent du PICC et du LiDAR |
 | Photos | Baies, matériaux, saillies | Lecture sur image : statut « estimé », avec marge |
 
 Un modèle importé (glTF) va à l'encontre du « pas de modèle » des démos d'origine. Pour un projet réel, la fidélité passe avant : garder la géométrie importée, mais dessiner les matières en code pour rester léger.
